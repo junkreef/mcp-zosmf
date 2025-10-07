@@ -1,0 +1,13 @@
+# Virtual environment
+.venv/
+
+# IDE/Editor specific
+.vscode/
+.gemini/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# pyenv
+.python-version
