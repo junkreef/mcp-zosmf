@@ -1,10 +1,10 @@
 import argparse
 from fastmcp import FastMCP
 
-from client import ZosmfClient
-from tools.jobs import JobsTools
-from tools.files import FilesTools
-from tools.console import ConsoleTools
+from .client import ZosmfClient
+from .tools.jobs import JobsTools
+from .tools.files import FilesTools
+from .tools.console import ConsoleTools
 
 # Create an MCP server based on the QuickStart guide
 app = FastMCP("MCP z/OSMF Server")

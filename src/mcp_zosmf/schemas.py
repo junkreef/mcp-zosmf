@@ -36,11 +36,11 @@ class ZosmfJsonJob(BaseModel):
     phase: Annotated[
         int | None,
         Field(description="An integer that represents the current phase of the job."),
-    ]
+    ] = None
     phase_name: Annotated[
         str | None,
         Field(alias="phase-name", description="The name of the current job phase."),
-    ]
+    ] = None
     step_data: Annotated[
         str | None,
         Field(

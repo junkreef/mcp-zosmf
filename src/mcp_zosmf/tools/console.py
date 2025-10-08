@@ -6,8 +6,8 @@ import requests
 import urllib3
 import json
 
-from schemas import ZosmfJsonConsoleIssueSyncCommand
-from client import ZosmfClient
+from ..schemas import ZosmfJsonConsoleIssueSyncCommand
+from ..client import ZosmfClient
 
 class ConsoleTools:
     def __init__(self, mcp_app: FastMCP, zosmf_client: ZosmfClient):

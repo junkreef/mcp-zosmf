@@ -6,8 +6,8 @@ import requests
 import urllib3
 import json
 
-from schemas import ZosmfJsonDataSetList, ZosmfJsonDataSetMemberList
-from client import ZosmfClient
+from ..schemas import ZosmfJsonDataSetList, ZosmfJsonDataSetMemberList
+from ..client import ZosmfClient
 
 class FilesTools:
     def __init__(self, mcp_app: FastMCP, zosmf_client: ZosmfClient):
