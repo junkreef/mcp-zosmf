@@ -10,3 +10,6 @@ __pycache__/
 
 # pyenv
 .python-version
+
+# Build artifacts
+*.egg-info/

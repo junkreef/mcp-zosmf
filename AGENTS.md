@@ -10,9 +10,9 @@ The system aims to provide tools for manipulating various z/OS resources, coveri
 
 ## 2. Build and Test Commands
 
-*   **Environment Setup:** This project uses `uv` for dependency management. To install all required dependencies, run:
+*   **Environment Setup:** This project uses `uv` for dependency management. To install all required dependencies, including those for testing, run:
     ```bash
-    uv sync
+    uv sync --all-extras
     ```
 
 *   **Running Tests:** The project has a comprehensive test suite using `pytest`. To run all tests and ensure the project's integrity, use the following command:
