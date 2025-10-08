@@ -3,7 +3,6 @@
 
 # IDE/Editor specific
 .vscode/
-.gemini/
 
 # Python cache
 __pycache__/
