@@ -11,5 +11,8 @@ __pycache__/
 # pyenv
 .python-version
 
+# Config File
+.env
+
 # Build artifacts
 *.egg-info/
