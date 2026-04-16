@@ -458,6 +458,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
+    { name = "pydantic-settings" },
     { name = "requests" },
 ]
 
@@ -469,6 +470,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "fastmcp", specifier = ">=2.11.3" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.4.2" },
     { name = "requests", specifier = ">=2.32.5" },
 ]
