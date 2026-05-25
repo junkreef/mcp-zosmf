@@ -330,7 +330,60 @@ class ZosmfJsonDataSetList(BaseModel):
     ] = None
 
 
+class ZosmfJsonUnixFile(BaseModel):
+    name: Annotated[str, Field(description="File or directory name.")]
+    mode: Annotated[
+        str | None,
+        Field(description="Permissions indicating the file mode (e.g. drwxrwxrwx, -rw-r----)."),
+    ] = None
+    size: Annotated[
+        int | None,
+        Field(description="For regular files, the file's size in bytes. For other kinds of files, the value of this field is unspecified."),
+    ] = None
+    uid: Annotated[
+        int | None,
+        Field(description="The numeric user ID (UID) of the file's owner."),
+    ] = None
+    user: Annotated[
+        str | None,
+        Field(description="The user name of the file's owner got by UID."),
+    ] = None
+    gid: Annotated[
+        int | None,
+        Field(description="The numeric group ID (GID) of the file's group."),
+    ] = None
+    group: Annotated[
+        str | None,
+        Field(description="The group name of the file's group got by GID."),
+    ] = None
+    mtime: Annotated[
+        str | None,
+        Field(description="The most recent time the contents of the file were changed."),
+    ] = None
+    target: Annotated[
+        str | None,
+        Field(description="If the file is symlink, this indicates the really file/directory"),
+    ] = None
+
+
+class ZosmfJsonUnixFileList(BaseModel):
+    items: Annotated[
+        list[ZosmfJsonUnixFile],
+        Field(description="JSON array of UNIX files and directories."),
+    ]
+    returnedRows: Annotated[
+        int, Field(description="Number of rows that were returned for this request.")
+    ]
+    moreRows: Annotated[
+        bool | None, Field(description="Optional property; set to true when more rows can be returned.")
+    ] = None
+    totalRows: Annotated[
+        int | None, Field(description="Total number of rows that match the request.")
+    ] = None
+
+
 class ZosmfJsonConsoleIssueSyncCommand(BaseModel):
     cmd_response: Annotated[
         str | None, Field(alias="cmd-response", description="Command response.")
     ] = None
+

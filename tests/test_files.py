@@ -5,7 +5,8 @@ from requests.exceptions import HTTPError
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from mcp_zosmf.tools.files import FilesTools
-from mcp_zosmf.schemas import ZosmfJsonDataSetList, ZosmfJsonDataSetMemberList
+from mcp_zosmf.schemas import ZosmfJsonDataSetList, ZosmfJsonDataSetMemberList, ZosmfJsonUnixFileList
+
 
 
 def test_restfiles_ds_list_success():
@@ -290,3 +291,168 @@ def test_restfiles_ds_put_error():
 
     # 4. Assert that the mock was called
     mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_files_tools_registration():
+    """
+    Tests that the newly added UNIX file tools are successfully registered to the FastMCP app.
+    """
+    mock_app = FastMCP("TestApp")
+    mock_zosmf_client = Mock()
+
+    # Instantiate FilesTools to trigger registration
+    FilesTools(mock_app, mock_zosmf_client)
+
+    # Get the names of all registered tools
+    registered_tool_names = list(mock_app._tool_manager._tools.keys())
+
+
+
+    expected_new_tools = [
+        "restfiles_fs_list",
+        "restfiles_fs_get",
+        "restfiles_fs_post",
+        "restfiles_fs_put",
+        "restfiles_fs_delete",
+    ]
+
+    for tool_name in expected_new_tools:
+        assert tool_name in registered_tool_names
+
+
+def test_restfiles_fs_list_success():
+    """
+    Tests the successful listing of UNIX files.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    fake_fs_list_json = {
+        "items": [
+            {
+                "name": "file.txt",
+                "mode": "-rw-r----",
+                "size": 128,
+                "uid": 1001,
+                "user": "IBMUSER",
+                "gid": 10,
+                "group": "SYS1",
+                "mtime": "2026-05-25T12:00:00"
+            },
+            {
+                "name": "dir1",
+                "mode": "drwxr-xr-x",
+                "size": 4096,
+                "uid": 1001,
+                "user": "IBMUSER",
+                "gid": 10,
+                "group": "SYS1",
+                "mtime": "2026-05-25T12:05:00"
+            }
+        ],
+        "returnedRows": 2,
+        "totalRows": 2
+    }
+    mock_zosmf_client._call_zosmf_api.return_value = fake_fs_list_json
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    result = files_tools.restfiles_fs_list(path="/u/user")
+
+    assert isinstance(result, ZosmfJsonUnixFileList)
+    assert len(result.items) == 2
+    assert result.items[0].name == "file.txt"
+    assert result.items[0].size == 128
+    assert result.items[1].mode == "drwxr-xr-x"
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_fs_list_validation_error():
+    """
+    Tests that a ToolError is raised when the UNIX file listing response has an invalid format.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    # Missing the required 'items' field
+    invalid_json = {"returnedRows": 2}
+    mock_zosmf_client._call_zosmf_api.return_value = invalid_json
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    with pytest.raises(ToolError, match="JSON Validation error"):
+        files_tools.restfiles_fs_list(path="/u/user")
+
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_fs_get_success():
+    """
+    Tests the successful retrieval of UNIX file content.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    fake_content = "Hello from z/OS UNIX File System!"
+    mock_zosmf_client._call_zosmf_api.return_value = fake_content
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    result = files_tools.restfiles_fs_get(filepath="/u/user/file.txt")
+
+    assert result == fake_content
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_fs_post_success():
+    """
+    Tests the successful creation of a UNIX file or directory.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+    mock_zosmf_client._call_zosmf_api.return_value = None
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    result = files_tools.restfiles_fs_post(
+        filepath="/u/user/newdir",
+        type="directory",
+        mode="rwxr-xr-x"
+    )
+
+    assert "Successfully created directory at /u/user/newdir" in result
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_fs_put_success():
+    """
+    Tests successfully writing data to a UNIX file.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+    mock_zosmf_client._call_zosmf_api.return_value = ""
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    result = files_tools.restfiles_fs_put(
+        filepath="/u/user/file.txt",
+        body="New Content",
+        binary=False
+    )
+
+    assert "Successfully wrote to /u/user/file.txt" in result
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_fs_delete_success():
+    """
+    Tests successfully deleting a UNIX file or directory.
+    """
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+    mock_zosmf_client._call_zosmf_api.return_value = None
+
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+    result = files_tools.restfiles_fs_delete(
+        filepath="/u/user/file.txt",
+        recursive=False
+    )
+
+    assert "Successfully deleted /u/user/file.txt" in result
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
