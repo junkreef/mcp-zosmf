@@ -4,6 +4,9 @@
 # IDE/Editor specific
 .vscode/
 
+# Agents specific
+.antigravitycli/
+
 # Python cache
 __pycache__/
 *.pyc

@@ -15,6 +15,7 @@ class FilesTools:
         mcp_app.tool(self.restfiles_ds_list)
         mcp_app.tool(self.restfiles_ds_memberlist)
         mcp_app.tool(self.restfiles_ds_get)
+        mcp_app.tool(self.restfiles_ds_put)
 
     def restfiles_ds_list(
         self,
@@ -154,5 +155,52 @@ class FilesTools:
         def api_call(headers):
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             return requests.get(url, headers=headers, verify=False)
+
+        return self.zosmf_client._call_zosmf_api(api_call)
+
+    def restfiles_ds_put(
+        self,
+        dataset_name: Annotated[
+            str,
+            Field(description="The dataset name to be written."),
+        ],
+        body: Annotated[
+            str,
+            Field(description="The content to be written to the data set or member."),
+        ],
+        member_name: Annotated[
+            str | None,
+            Field(
+                description="An optional parameter to specify the member name to be written. Required only if the dataset is a PDS."
+            ),
+        ] = None,
+        volser: Annotated[
+            str | None,
+            Field(
+                description="An optional parameter to specify the volume serials which contains the data set. If it's omitted, the dataset will be catalog searched."
+            ),
+        ] = None,
+        binary: Annotated[
+            bool,
+            Field(
+                description="Whether the data should be written in binary mode. Default is False (text mode)."
+            ),
+        ] = False,
+    ) -> str:
+        """Write data to a single PS data set or PDS member on z/OS."""
+        url = f"https://{self.zosmf_client.zosmf_host}/zosmf/restfiles/ds"
+        if volser is not None:
+            url += f"/-{volser}"
+        url += f"/{dataset_name}"
+        if member_name is not None:
+            url += f"({member_name})"
+
+        def api_call(headers):
+            headers["X-IBM-Data-Type"] = "binary" if binary else "text"
+            headers["Content-Type"] = (
+                "application/octet-stream" if binary else "text/plain"
+            )
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            return requests.put(url, headers=headers, data=body, verify=False)
 
         return self.zosmf_client._call_zosmf_api(api_call)

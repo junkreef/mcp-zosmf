@@ -184,3 +184,109 @@ def test_restfiles_ds_list_empty_response():
     assert len(result.items) == 0
     assert result.returnedRows == 0
     mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+def test_restfiles_ds_put_success_text():
+    """
+    Tests the successful write of content in text mode.
+    """
+    # 1. Setup Mocks
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    # Fake response from the API (usually empty for PUT or a simple success message)
+    fake_response = ""
+    mock_zosmf_client._call_zosmf_api.return_value = fake_response
+
+    # 2. Instantiate the tool class
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+
+    # 3. Call the method
+    result = files_tools.restfiles_ds_put(
+        dataset_name="USER.TEST.DATASET1",
+        body="New content",
+        binary=False
+    )
+
+    # 4. Assertions
+    assert result == fake_response
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+
+def test_restfiles_ds_put_success_binary():
+    """
+    Tests the successful write of content in binary mode to a PDS member.
+    """
+    # 1. Setup Mocks
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    # Fake response from the API
+    fake_response = ""
+    mock_zosmf_client._call_zosmf_api.return_value = fake_response
+
+    # 2. Instantiate the tool class
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+
+    # 3. Call the method
+    result = files_tools.restfiles_ds_put(
+        dataset_name="USER.TEST.PDS",
+        member_name="MEMBER1",
+        body="Binary data",
+        binary=True
+    )
+
+    # 4. Assertions
+    assert result == fake_response
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+def test_restfiles_ds_put_with_volser():
+    """
+    Tests the write of content with a volser.
+    """
+    # 1. Setup Mocks
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    # Fake response from the API
+    fake_response = ""
+    mock_zosmf_client._call_zosmf_api.return_value = fake_response
+
+    # 2. Instantiate the tool class
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+
+    # 3. Call the method
+    result = files_tools.restfiles_ds_put(
+        dataset_name="USER.TEST.DATASET1",
+        body="Content",
+        volser="VOL001"
+    )
+
+    # 4. Assertions
+    assert result == fake_response
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
+
+def test_restfiles_ds_put_error():
+    """
+    Tests handling of API error during write.
+    """
+    # 1. Setup Mocks
+    mock_app = Mock(spec=FastMCP)
+    mock_zosmf_client = Mock()
+
+    # Configure the API wrapper to raise a ToolError
+    mock_zosmf_client._call_zosmf_api.side_effect = ToolError(
+        "API call failed: 403 Forbidden"
+    )
+
+    # 2. Instantiate the tool class
+    files_tools = FilesTools(mock_app, mock_zosmf_client)
+
+    # 3. Call the method and assert that it raises the correct exception
+    with pytest.raises(ToolError, match="API call failed: 403 Forbidden"):
+        files_tools.restfiles_ds_put(
+            dataset_name="USER.TEST.DATASET1",
+            body="Content"
+        )
+
+    # 4. Assert that the mock was called
+    mock_zosmf_client._call_zosmf_api.assert_called_once()
