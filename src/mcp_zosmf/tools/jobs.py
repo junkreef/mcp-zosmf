@@ -6,7 +6,7 @@ import requests
 import urllib3
 import json
 
-from ..schemas import ZosmfJsonJob, ZosmfJsonJobFile
+from ..schemas import ZosmfJsonJob, ZosmfJsonJobFile, ZosmfJobFeedback
 from ..client import ZosmfClient
 
 class JobsTools:
@@ -18,6 +18,7 @@ class JobsTools:
         mcp_app.tool(self.restjobs_jobs_file)
         mcp_app.tool(self.restjobs_jobs_submit_jcl)
         mcp_app.tool(self.restjobs_jobs_submit)
+        mcp_app.tool(self.restjobs_jobs_change_status)
 
     def restjobs_job_status(
         self,
@@ -191,5 +192,31 @@ class JobsTools:
         try:
             result = self.zosmf_client._call_zosmf_api(api_call)
             return ZosmfJsonJob(**result)
+        except ValidationError as e:
+            raise ToolError(f"JSON Validation error: {e}")
+
+    def restjobs_jobs_change_status(
+        self,
+        jobname: Annotated[str, Field(description="The job name.")],
+        jobid: Annotated[str, Field(description="The job ID.")],
+        request: Annotated[
+            str,
+            Field(
+                description="The action to perform on the job. Must be one of: 'hold', 'release', 'cancel'."
+            ),
+        ],
+    ) -> ZosmfJobFeedback:
+        """Hold, release, or cancel a job on z/OS."""
+        url = f"https://{self.zosmf_client.zosmf_host}/zosmf/restjobs/jobs/{jobname}/{jobid}"
+        body = {"request": request, "version": "2.0"}
+
+        def api_call(headers):
+            headers["Content-Type"] = "application/json"
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            return requests.put(url, json=body, headers=headers, verify=False)
+
+        try:
+            result = self.zosmf_client._call_zosmf_api(api_call)
+            return ZosmfJobFeedback(**result)
         except ValidationError as e:
             raise ToolError(f"JSON Validation error: {e}")
