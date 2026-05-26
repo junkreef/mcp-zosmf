@@ -386,4 +386,46 @@ class ZosmfJsonConsoleIssueSyncCommand(BaseModel):
     cmd_response: Annotated[
         str | None, Field(alias="cmd-response", description="Command response.")
     ] = None
+    cmd_response_key: Annotated[
+        str | None,
+        Field(
+            alias="cmd-response-key",
+            description="Key that can be used to retrieve the command response later when cmd-response is empty.",
+        ),
+    ] = None
+    cmd_response_url: Annotated[
+        str | None,
+        Field(
+            alias="cmd-response-url",
+            description="URL that can be used to retrieve the command response later when cmd-response is empty.",
+        ),
+    ] = None
+
+
+class ZosmfJobFeedback(BaseModel):
+    jobid: Annotated[str | None, Field(description="Job ID.")] = None
+    jobname: Annotated[str | None, Field(description="Job name.")] = None
+    original_jobid: Annotated[
+        str | None,
+        Field(alias="original-jobid", description="Original job ID."),
+    ] = None
+    owner: Annotated[str | None, Field(description="z/OS user ID associated with the job.")] = None
+    member: Annotated[str | None, Field(description="JES2 MAS member name.")] = None
+    sysname: Annotated[str | None, Field(description="z/OS system name.")] = None
+    job_correlator: Annotated[
+        str | None,
+        Field(alias="job-correlator", description="Job correlator."),
+    ] = None
+    status: Annotated[
+        int | None,
+        Field(description="Job processing status. 0 means success."),
+    ] = None
+    internal_code: Annotated[
+        str | None,
+        Field(alias="internal-code", description="Internal service routine return code on error."),
+    ] = None
+    message: Annotated[
+        str | None,
+        Field(description="Description of the error, if status is non-zero."),
+    ] = None
 
